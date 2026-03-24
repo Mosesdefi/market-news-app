@@ -65,32 +65,23 @@ app.get("/news", async (req, res) => {
 // PRICE API
 app.get("/prices", async (req, res) => {
   try {
-    const options = {
-      hostname: "api.coingecko.com",
-      path: "/api/v3/simple/price?ids=bitcoin,ethereum,solana&vs_currencies=usd&include_24hr_change=true",
-      headers: {
-        "User-Agent": "AlphaFeed"
-      }
-    };
+    const url = "https://api.coingecko.com/api/v3/simple/price?ids=bitcoin,ethereum,solana&vs_currencies=usd&include_24hr_change=true";
 
-    const data = await new Promise((resolve, reject) => {
-      https
-        .get(options, (r) => {
-          let d = "";
-          r.on("data", (c) => (d += c));
-          r.on("end", () => resolve(JSON.parse(d)));
-        })
-        .on("error", reject);
-    });
+    const response = await fetch(url);
+    const data = await response.json();
 
     res.json(data);
 
   } catch (error) {
-    console.error("Price error:", error.message);
-    res.status(500).json({ error: "Failed to fetch prices" });
+    console.error("CoinGecko failed:", error.message);
+
+    res.json({
+      bitcoin: { usd: 0, usd_24h_change: 0 },
+      ethereum: { usd: 0, usd_24h_change: 0 },
+      solana: { usd: 0, usd_24h_change: 0 }
+    });
   }
 });
-
 // SENTIMENT API
 app.get("/sentiment", (req, res) => {
   const headline = req.query.headline?.toLowerCase() || "";
