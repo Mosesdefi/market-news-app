@@ -108,6 +108,10 @@ app.get("/sentiment", (req, res) => {
   res.json({ sentiment });
 });
 
+app.get("/", (req, res) => {
+  res.send("AlphaFeed API is running! Visit /news, /prices, /sentiment");
+});
+
 app.listen(PORT, () => {
   console.log(`AlphaFeed API running on port ${PORT}`);
 });
