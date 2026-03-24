@@ -9,26 +9,25 @@ const parser = new Parser();
 app.use(cors());
 app.use(express.json());
 
-const PORT = process.env.PORT || 3000;
-
-const feeds = [
-  { url: "https://cointelegraph.com/rss", source: "Cointelegraph" },
-  { url: "https://www.coindesk.com/arc/outboundfeeds/rss/", source: "CoinDesk" },
-  { url: "https://decrypt.co/feed", source: "Decrypt" },
-  { url: "https://cryptobriefing.com/feed/", source: "Crypto Briefing" }
-];
-
-// Health check (important for Railway + debugging)
+// Root route — check API status
 app.get("/", (req, res) => {
   res.json({
-    status: "AlphaFeed API running",
+    status: "ok",
+    message: "AlphaFeed API is running",
     endpoints: ["/news", "/prices", "/sentiment"]
   });
 });
 
-// NEWS API
+// Fetch crypto news from multiple RSS feeds
 app.get("/news", async (req, res) => {
   try {
+    const feeds = [
+      { url: "https://cointelegraph.com/rss", source: "Cointelegraph" },
+      { url: "https://www.coindesk.com/arc/outboundfeeds/rss/", source: "CoinDesk" },
+      { url: "https://decrypt.co/feed", source: "Decrypt" },
+      { url: "https://cryptobriefing.com/feed/", source: "Crypto Briefing" }
+    ];
+
     const results = await Promise.allSettled(
       feeds.map(feed =>
         parser.parseURL(feed.url).then(parsed =>
@@ -44,16 +43,12 @@ app.get("/news", async (req, res) => {
     );
 
     let articles = [];
-
     results.forEach(result => {
-      if (result.status === "fulfilled") {
-        articles = articles.concat(result.value);
-      }
+      if (result.status === "fulfilled") articles = articles.concat(result.value);
     });
 
     articles.sort((a, b) => new Date(b.date) - new Date(a.date));
 
-    console.log(`Fetched ${articles.length} articles`);
     res.json(articles);
 
   } catch (error) {
@@ -62,41 +57,41 @@ app.get("/news", async (req, res) => {
   }
 });
 
-// PRICE API
+// Fetch crypto prices
 app.get("/prices", async (req, res) => {
   try {
-    const url = "https://api.coingecko.com/api/v3/simple/price?ids=bitcoin,ethereum,solana&vs_currencies=usd&include_24hr_change=true";
+    const options = {
+      hostname: 'api.coingecko.com',
+      path: '/api/v3/simple/price?ids=bitcoin,ethereum,solana&vs_currencies=usd',
+      headers: { 'User-Agent': 'Mozilla/5.0' }
+    };
 
-    const response = await fetch(url);
-    const data = await response.json();
-
-    res.json(data);
-
-  } catch (error) {
-    console.error("CoinGecko failed:", error.message);
+    const data = await new Promise((resolve, reject) => {
+      https.get(options, r => {
+        let d = '';
+        r.on('data', c => d += c);
+        r.on('end', () => resolve(JSON.parse(d)));
+      }).on('error', reject);
+    });
 
     res.json({
-      bitcoin: { usd: 0, usd_24h_change: 0 },
-      ethereum: { usd: 0, usd_24h_change: 0 },
-      solana: { usd: 0, usd_24h_change: 0 }
+      bitcoin: { usd: data.bitcoin?.usd || 0 },
+      ethereum: { usd: data.ethereum?.usd || 0 },
+      solana: { usd: data.solana?.usd || 0 }
     });
+
+  } catch (error) {
+    console.error("Price ERROR:", error.message);
+    res.status(500).json({ error: "Failed to fetch prices" });
   }
 });
-// SENTIMENT API
+
+// Simple sentiment analysis
 app.get("/sentiment", (req, res) => {
   const headline = req.query.headline?.toLowerCase() || "";
 
-  const bullishWords = [
-    "surge","soar","rally","jump","gain","rise","high","bull","bullish",
-    "growth","approve","launch","adoption","buy","inflow","record",
-    "partnership","expand","boost","recover","positive","profit"
-  ];
-
-  const bearishWords = [
-    "crash","drop","fall","plunge","decline","low","bear","bearish",
-    "dump","sell","outflow","ban","hack","scam","fraud","lawsuit",
-    "panic","risk","collapse","loss","negative","rejected"
-  ];
+  const bullishWords = ["surge","rally","gain","rise","bullish","up","growth","buy","record","boost","recover","positive","profit"];
+  const bearishWords = ["crash","drop","fall","plunge","decline","bearish","down","dump","sell","ban","hack","scam","fraud","lawsuit","fear","panic","loss","negative","fail"];
 
   const bullishScore = bullishWords.filter(w => headline.includes(w)).length;
   const bearishScore = bearishWords.filter(w => headline.includes(w)).length;
@@ -105,13 +100,9 @@ app.get("/sentiment", (req, res) => {
   if (bullishScore > bearishScore) sentiment = "Bullish";
   else if (bearishScore > bullishScore) sentiment = "Bearish";
 
-  res.json({ sentiment });
+  res.json({ headline, sentiment });
 });
 
-app.get("/", (req, res) => {
-  res.send("AlphaFeed API is running! Visit /news, /prices, /sentiment");
-});
-
-app.listen(PORT, () => {
-  console.log(`AlphaFeed API running on port ${PORT}`);
-});
+// Start server
+const PORT = process.env.PORT || 3000;
+app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
