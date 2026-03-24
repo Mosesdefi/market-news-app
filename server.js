@@ -50,28 +50,37 @@ app.get("/news", async (req, res) => {
     }
   });
 
-app.get("/prices", async (req, res) => {
-  try {
-    const response = await fetch(
-      "https://api.binance.com/api/v3/ticker/price?symbols=[%22BTCUSDT%22,%22ETHUSDT%22,%22SOLUSDT%22]"
-    );
-    const data = await response.json();
-
-    console.log("Price data:", data);
-
-    const prices = {};
-    data.forEach(item => {
-      if (item.symbol === "BTCUSDT") prices.bitcoin = { usd: parseFloat(item.price), usd_24h_change: 0 };
-      if (item.symbol === "ETHUSDT") prices.ethereum = { usd: parseFloat(item.price), usd_24h_change: 0 };
-      if (item.symbol === "SOLUSDT") prices.solana = { usd: parseFloat(item.price), usd_24h_change: 0 };
-    });
-
-    res.json(prices);
-  } catch (error) {
-    console.error("Price error:", error.message);
-    res.json({});
-  }
-});
+  app.get("/prices", async (req, res) => {
+    try {
+      const https = require('https');
+      
+      const options = {
+        hostname: 'api.coingecko.com',
+        path: '/api/v3/simple/price?ids=bitcoin,ethereum,solana&vs_currencies=usd',
+        headers: {
+          'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'
+        }
+      };
+  
+      const data = await new Promise((resolve, reject) => {
+        https.get(options, (r) => {
+          let d = '';
+          r.on('data', (c) => d += c);
+          r.on('end', () => resolve(JSON.parse(d)));
+        }).on('error', reject);
+      });
+  
+      res.json({
+        bitcoin: { usd: data.bitcoin.usd, usd_24h_change: 0 },
+        ethereum: { usd: data.ethereum.usd, usd_24h_change: 0 },
+        solana: { usd: data.solana.usd, usd_24h_change: 0 }
+      });
+  
+    } catch (error) {
+      console.error("Price error:", error.message);
+      res.json({});
+    }
+  });
 
 app.get("/sentiment", (req, res) => {
   const headline = req.query.headline?.toLowerCase() || "";

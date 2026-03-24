@@ -140,7 +140,7 @@
         generateSummary(data);
         generateTrending(data);
         generateBTCSignal(data);
-        generateBreakingNews(data); 
+        
 
       } catch (error) {
         console.error(error);
@@ -426,43 +426,38 @@
 
     // ─── PRICES ───────────────────────────────────────────────
     async function fetchPrices() {
-      try {
-        const res = await fetch(
-          "https://api.binance.com/api/v3/ticker/price?symbols=[%22BTCUSDT%22,%22ETHUSDT%22,%22SOLUSDT%22]"
-        );
-        const data = await res.json();
-        const map = {};
-        data.forEach(item => {
-          if (item.symbol === "BTCUSDT") map.bitcoin = parseFloat(item.price);
-          if (item.symbol === "ETHUSDT") map.ethereum = parseFloat(item.price);
-          if (item.symbol === "SOLUSDT") map.solana = parseFloat(item.price);
-        });
+  try {
+    const res = await fetch("http://localhost:3000/prices");
+    const data = await res.json();
 
-        const coins = [
-          { id: "bitcoin", symbol: "BTC", color: "text-orange-400" },
-          { id: "ethereum", symbol: "ETH", color: "text-blue-400" },
-          { id: "solana", symbol: "SOL", color: "text-purple-400" }
-        ];
+    const coins = [
+      { id: "bitcoin", symbol: "BTC", color: "text-orange-400" },
+      { id: "ethereum", symbol: "ETH", color: "text-blue-400" },
+      { id: "solana", symbol: "SOL", color: "text-purple-400" }
+    ];
 
-        const pillBg = isDark ? "bg-white/5 border-white/10" : "bg-white border-gray-200";
-        const priceColor = isDark ? "text-white" : "text-gray-900";
+    const pillBg = isDark ? "bg-white/5 border-white/10" : "bg-white border-gray-200";
+    const priceColor = isDark ? "text-white" : "text-gray-900";
 
-        document.getElementById("price-bar").innerHTML = coins.map(coin => {
-          const price = map[coin.id]?.toLocaleString("en-US", { style: "currency", currency: "USD" });
-          return `
-            <div class="${pillBg} border rounded-xl px-4 py-3 flex items-center gap-3">
-              <span class="${coin.color} font-bold">${coin.symbol}</span>
-              <span class="${priceColor} font-semibold">${price}</span>
-            </div>
-          `;
-        }).join("");
+    document.getElementById("price-bar").innerHTML = coins.map(coin => {
+      const price = data[coin.id]?.usd?.toLocaleString("en-US", {
+  style: "currency", currency: "USD"
+});
 
-      } catch (error) {
-        console.error("Price fetch failed:", error);
-        document.getElementById("price-bar").innerHTML =
-          `<p class="text-gray-400 text-sm">Prices unavailable</p>`;
-      }
-    }
+      return `
+        <div class="${pillBg} border rounded-xl px-4 py-3 flex items-center gap-3">
+          <span class="${coin.color} font-bold">${coin.symbol}</span>
+          <span class="${priceColor} font-semibold">${price}</span>
+        </div>
+      `;
+    }).join("");
+
+  } catch (error) {
+    console.error("Price fetch failed:", error);
+    document.getElementById("price-bar").innerHTML =
+      `<p class="text-gray-400 text-sm">Prices unavailable</p>`;
+  }
+}
 
     // ─── EVENT LISTENERS ──────────────────────────────────────
     document.getElementById("search-input").addEventListener("input", (e) => {
