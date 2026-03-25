@@ -9,7 +9,6 @@ const parser = new Parser();
 app.use(cors());
 app.use(express.json());
 
-// Root route — check API status
 app.get("/", (req, res) => {
   res.json({
     status: "ok",
@@ -18,7 +17,6 @@ app.get("/", (req, res) => {
   });
 });
 
-// Fetch crypto news from multiple RSS feeds
 app.get("/news", async (req, res) => {
   try {
     const feeds = [
@@ -48,7 +46,6 @@ app.get("/news", async (req, res) => {
     });
 
     articles.sort((a, b) => new Date(b.date) - new Date(a.date));
-
     res.json(articles);
 
   } catch (error) {
@@ -57,13 +54,12 @@ app.get("/news", async (req, res) => {
   }
 });
 
-// Fetch crypto prices
 app.get("/prices", async (req, res) => {
   try {
-    const response = await new Promise((resolve, reject) => {
+    const fetchTicker = (id) => new Promise((resolve, reject) => {
       https.get({
         hostname: 'api.coinpaprika.com',
-        path: '/v1/tickers/btc-bitcoin,eth-ethereum,sol-solana',
+        path: `/v1/tickers/${id}`,
         headers: { 'User-Agent': 'Mozilla/5.0' }
       }, (r) => {
         let d = '';
@@ -72,10 +68,16 @@ app.get("/prices", async (req, res) => {
       }).on('error', reject);
     });
 
+    const [btc, eth, sol] = await Promise.all([
+      fetchTicker('btc-bitcoin'),
+      fetchTicker('eth-ethereum'),
+      fetchTicker('sol-solana')
+    ]);
+
     res.json({
-      bitcoin: { usd: response[0]?.quotes?.USD?.price || 0 },
-      ethereum: { usd: response[1]?.quotes?.USD?.price || 0 },
-      solana: { usd: response[2]?.quotes?.USD?.price || 0 }
+      bitcoin: { usd: btc?.quotes?.USD?.price || 0 },
+      ethereum: { usd: eth?.quotes?.USD?.price || 0 },
+      solana: { usd: sol?.quotes?.USD?.price || 0 }
     });
 
   } catch (error) {
@@ -84,13 +86,6 @@ app.get("/prices", async (req, res) => {
   }
 });
 
-  } catch (error) {
-    console.error("Price ERROR:", error.message);
-    res.status(500).json({ error: "Failed to fetch prices" });
-  }
-});
-
-// Simple sentiment analysis
 app.get("/sentiment", (req, res) => {
   const headline = req.query.headline?.toLowerCase() || "";
 
@@ -107,6 +102,5 @@ app.get("/sentiment", (req, res) => {
   res.json({ headline, sentiment });
 });
 
-// Start server
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
