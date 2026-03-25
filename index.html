@@ -127,7 +127,7 @@
     // ─── FETCH NEWS ───────────────────────────────────────────
     async function fetchNews() {
       try {
-        const res = await fetch("http://localhost:3000/news");
+        const res = await fetch("https://alphafeed.up.railway.app/news");
         const data = await res.json();
 
         if (!data || data.length === 0) {
@@ -406,8 +406,7 @@
     // ─── SENTIMENT ────────────────────────────────────────────
     async function analyzeSentiment(headline, elementId) {
       try {
-        const res = await fetch(
-          `http://localhost:3000/sentiment?headline=${encodeURIComponent(headline)}`
+        const res = await fetch(`https://alphafeed.up.railway.app/sentiment?headline=${encodeURIComponent(headline)}`
         );
         const data = await res.json();
         const el = document.getElementById(elementId);
@@ -427,7 +426,7 @@
     // ─── PRICES ───────────────────────────────────────────────
     async function fetchPrices() {
   try {
-    const res = await fetch("http://localhost:3000/prices");
+    const res = await fetch("https://alphafeed.up.railway.app/prices");
     const data = await res.json();
 
     const coins = [
