@@ -60,14 +60,12 @@ app.get("/news", async (req, res) => {
 // Fetch crypto prices
 app.get("/prices", async (req, res) => {
   try {
-    const options = {
-      hostname: 'api.coingecko.com',
-      path: '/api/v3/simple/price?ids=bitcoin,ethereum,solana&vs_currencies=usd',
-      headers: { 'User-Agent': 'Mozilla/5.0' }
-    };
-
-    const data = await new Promise((resolve, reject) => {
-      https.get(options, r => {
+    const response = await new Promise((resolve, reject) => {
+      https.get({
+        hostname: 'api.coinpaprika.com',
+        path: '/v1/tickers/btc-bitcoin,eth-ethereum,sol-solana',
+        headers: { 'User-Agent': 'Mozilla/5.0' }
+      }, (r) => {
         let d = '';
         r.on('data', c => d += c);
         r.on('end', () => resolve(JSON.parse(d)));
@@ -75,10 +73,16 @@ app.get("/prices", async (req, res) => {
     });
 
     res.json({
-      bitcoin: { usd: data.bitcoin?.usd || 0 },
-      ethereum: { usd: data.ethereum?.usd || 0 },
-      solana: { usd: data.solana?.usd || 0 }
+      bitcoin: { usd: response[0]?.quotes?.USD?.price || 0 },
+      ethereum: { usd: response[1]?.quotes?.USD?.price || 0 },
+      solana: { usd: response[2]?.quotes?.USD?.price || 0 }
     });
+
+  } catch (error) {
+    console.error("Price ERROR:", error.message);
+    res.status(500).json({ error: "Failed to fetch prices" });
+  }
+});
 
   } catch (error) {
     console.error("Price ERROR:", error.message);
@@ -105,6 +109,4 @@ app.get("/sentiment", (req, res) => {
 
 // Start server
 const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => {
-  console.log(`Server running on port ${PORT}`);
-});
+app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
