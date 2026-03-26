@@ -2,50 +2,79 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Market News</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AlphaFeed</title>
   <script src="https://cdn.tailwindcss.com"></script>
 </head>
 
 <body class="bg-gradient-to-br from-slate-900 via-gray-900 to-black min-h-screen text-white">
 
-  <div class="max-w-5xl mx-auto px-6 py-10">
+  <div class="max-w-5xl mx-auto px-4 sm:px-6 py-6 sm:py-10">
 
     <!-- Breaking News Banner -->
-<div id="breaking-banner" class="hidden mb-6 p-4 rounded-2xl border border-red-400/30 bg-red-400/10 flex items-start gap-3">
-  <span class="text-red-400 font-bold text-sm uppercase tracking-widest whitespace-nowrap mt-0.5">🚨 Breaking</span>
-  <p id="breaking-text" class="text-sm text-white leading-relaxed"></p>
-  <button onclick="document.getElementById('breaking-banner').classList.add('hidden')"
-    class="ml-auto text-gray-500 hover:text-white transition text-lg leading-none">✕</button>
-</div>
+    <div id="breaking-banner" class="hidden mb-6 p-4 rounded-2xl border border-red-400/30 bg-red-400/10 flex items-start gap-3">
+      <span class="text-red-400 font-bold text-xs sm:text-sm uppercase tracking-widest whitespace-nowrap mt-0.5">🚨 Breaking</span>
+      <p id="breaking-text" class="text-xs sm:text-sm text-white leading-relaxed"></p>
+      <button onclick="document.getElementById('breaking-banner').classList.add('hidden')"
+        class="ml-auto text-gray-500 hover:text-white transition text-lg leading-none">✕</button>
+    </div>
 
+    <!-- Header -->
     <div class="flex items-center justify-between mb-6">
-      <div class="flex items-center gap-3">
-        <div class="text-3xl">📊</div>
-        <h1 class="text-4xl font-bold tracking-tight">Crypto Market News</h1>
+      <div class="flex items-center gap-2 sm:gap-3">
+        <div class="text-2xl sm:text-3xl">📊</div>
+        <h1 class="text-2xl sm:text-4xl font-bold tracking-tight">AlphaFeed</h1>
       </div>
       <button id="theme-toggle"
-        class="bg-white/5 border border-white/10 rounded-xl px-4 py-2 text-sm font-medium hover:bg-white/10 transition">
+        class="bg-white/5 border border-white/10 rounded-xl px-3 py-2 text-xs sm:text-sm font-medium hover:bg-white/10 transition">
         🌙 Dark
       </button>
     </div>
 
     <!-- Price Bar -->
-    <div id="price-bar" class="flex gap-4 mb-8 flex-wrap">
+    <div id="price-bar" class="flex gap-2 sm:gap-4 mb-6 sm:mb-8 flex-wrap">
       <div class="text-gray-400 text-sm">Loading prices...</div>
     </div>
 
+    <!-- Fear & Greed Index -->
+    <div id="fear-greed" class="mb-6 sm:mb-8 p-4 sm:p-5 rounded-2xl border border-white/10 bg-white/5">
+      <h2 class="text-xs font-semibold text-gray-400 uppercase tracking-widest mb-3">😱 Fear & Greed Index</h2>
+      <div class="flex items-center gap-4 sm:gap-6">
+        <div class="relative w-20 h-20 sm:w-24 sm:h-24 flex-shrink-0">
+          <svg viewBox="0 0 36 36" class="w-20 h-20 sm:w-24 sm:h-24 -rotate-90">
+            <path d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
+              fill="none" stroke="#ffffff10" stroke-width="3"/>
+            <path id="fg-arc"
+              d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
+              fill="none" stroke="#facc15" stroke-width="3"
+              stroke-dasharray="0, 100"
+              style="transition: stroke-dasharray 1s ease, stroke 1s ease"/>
+          </svg>
+          <div class="absolute inset-0 flex items-center justify-center">
+            <span id="fg-score" class="text-xl sm:text-2xl font-bold">--</span>
+          </div>
+        </div>
+        <div>
+          <p id="fg-label" class="text-lg sm:text-xl font-semibold mb-1">Loading...</p>
+          <p id="fg-desc" class="text-gray-400 text-xs sm:text-sm max-w-xs sm:max-w-sm">
+            Measures market sentiment from 0 (Extreme Fear) to 100 (Extreme Greed).
+          </p>
+        </div>
+      </div>
+    </div>
+
     <!-- Watchlist -->
-    <div id="watchlist-section" class="mb-8 p-5 rounded-2xl border border-white/10 bg-white/5">
-      <h2 class="text-sm font-semibold text-gray-400 uppercase tracking-widest mb-3">⭐ My Watchlist</h2>
+    <div id="watchlist-section" class="mb-6 sm:mb-8 p-4 sm:p-5 rounded-2xl border border-white/10 bg-white/5">
+      <h2 class="text-xs font-semibold text-gray-400 uppercase tracking-widest mb-3">⭐ My Watchlist</h2>
       <div class="flex gap-2 mb-4 flex-wrap">
         <input
           id="watchlist-input"
           type="text"
           placeholder="Add coin (e.g. BTC, DOGE...)"
-          class="bg-white/5 border border-white/10 rounded-xl px-4 py-2 text-sm text-white placeholder-gray-500 focus:outline-none focus:border-blue-500 transition"
+          class="flex-1 min-w-0 bg-white/5 border border-white/10 rounded-xl px-4 py-2 text-sm text-white placeholder-gray-500 focus:outline-none focus:border-blue-500 transition"
         />
         <button onclick="addToWatchlist()"
-          class="bg-blue-500 hover:bg-blue-600 text-white text-sm px-4 py-2 rounded-xl transition font-medium">
+          class="bg-blue-500 hover:bg-blue-600 text-white text-sm px-4 py-2 rounded-xl transition font-medium whitespace-nowrap">
           + Add
         </button>
       </div>
@@ -55,39 +84,35 @@
     </div>
 
     <!-- BTC Signal Score -->
-    <div id="btc-signal" class="mb-8 p-5 rounded-2xl border border-white/10 bg-white/5">
-      <h2 class="text-sm font-semibold text-gray-400 uppercase tracking-widest mb-3">⚡ BTC Signal Score</h2>
-      <div class="flex items-center gap-6">
-        <div class="relative w-24 h-24">
-          <svg viewBox="0 0 36 36" class="w-24 h-24 -rotate-90">
-            <path
-              d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
-              fill="none" stroke="#ffffff10" stroke-width="3"
-            />
-            <path
-              id="signal-arc"
+    <div id="btc-signal" class="mb-6 sm:mb-8 p-4 sm:p-5 rounded-2xl border border-white/10 bg-white/5">
+      <h2 class="text-xs font-semibold text-gray-400 uppercase tracking-widest mb-3">⚡ BTC Signal Score</h2>
+      <div class="flex items-center gap-4 sm:gap-6">
+        <div class="relative w-20 h-20 sm:w-24 sm:h-24 flex-shrink-0">
+          <svg viewBox="0 0 36 36" class="w-20 h-20 sm:w-24 sm:h-24 -rotate-90">
+            <path d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
+              fill="none" stroke="#ffffff10" stroke-width="3"/>
+            <path id="signal-arc"
               d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
               fill="none" stroke="#facc15" stroke-width="3"
               stroke-dasharray="0, 100"
-              style="transition: stroke-dasharray 1s ease, stroke 1s ease"
-            />
+              style="transition: stroke-dasharray 1s ease, stroke 1s ease"/>
           </svg>
           <div class="absolute inset-0 flex items-center justify-center">
-            <span id="signal-score" class="text-2xl font-bold">--</span>
+            <span id="signal-score" class="text-xl sm:text-2xl font-bold">--</span>
           </div>
         </div>
         <div>
-          <p id="signal-label" class="text-xl font-semibold mb-1">Calculating...</p>
-          <p id="signal-desc" class="text-gray-400 text-sm max-w-sm">Analyzing BTC-related headlines to generate signal.</p>
+          <p id="signal-label" class="text-lg sm:text-xl font-semibold mb-1">Calculating...</p>
+          <p id="signal-desc" class="text-gray-400 text-xs sm:text-sm max-w-xs sm:max-w-sm">Analyzing BTC-related headlines.</p>
         </div>
       </div>
     </div>
 
     <!-- Market Summary -->
-    <div id="market-summary" class="mb-8 p-5 rounded-2xl border border-white/10 bg-white/5">
-      <h2 class="text-sm font-semibold text-gray-400 uppercase tracking-widest mb-2">📋 AI Market Summary</h2>
-      <p id="summary-text" class="text-lg leading-relaxed">Analyzing market...</p>
-      <div class="flex gap-3 mt-3">
+    <div id="market-summary" class="mb-6 sm:mb-8 p-4 sm:p-5 rounded-2xl border border-white/10 bg-white/5">
+      <h2 class="text-xs font-semibold text-gray-400 uppercase tracking-widest mb-2">📋 AI Market Summary</h2>
+      <p id="summary-text" class="text-base sm:text-lg leading-relaxed">Analyzing market...</p>
+      <div class="flex gap-2 sm:gap-3 mt-3 flex-wrap">
         <span id="summary-bullish" class="text-xs px-3 py-1 rounded-full bg-green-400/10 text-green-400 border border-green-400/20">🟢 Bullish: 0</span>
         <span id="summary-bearish" class="text-xs px-3 py-1 rounded-full bg-red-400/10 text-red-400 border border-red-400/20">🔴 Bearish: 0</span>
         <span id="summary-neutral" class="text-xs px-3 py-1 rounded-full bg-yellow-400/10 text-yellow-400 border border-yellow-400/20">🟡 Neutral: 0</span>
@@ -95,8 +120,8 @@
     </div>
 
     <!-- Trending Narratives -->
-    <div class="mb-8">
-      <h2 class="text-sm font-semibold text-gray-400 uppercase tracking-widest mb-3">🔥 Trending Narratives</h2>
+    <div class="mb-6 sm:mb-8">
+      <h2 class="text-xs font-semibold text-gray-400 uppercase tracking-widest mb-3">🔥 Trending Narratives</h2>
       <div id="trending-tags" class="flex gap-2 flex-wrap">
         <span class="text-gray-500 text-sm">Detecting trends...</span>
       </div>
@@ -108,13 +133,13 @@
         id="search-input"
         type="text"
         placeholder="Search news..."
-        class="w-full bg-white/5 border border-white/10 rounded-xl px-5 py-3 text-white placeholder-gray-500 focus:outline-none focus:border-blue-500 transition"
+        class="w-full bg-white/5 border border-white/10 rounded-xl px-5 py-3 text-white placeholder-gray-500 focus:outline-none focus:border-blue-500 transition text-sm sm:text-base"
       />
       <span class="absolute right-4 top-3 text-gray-500 text-lg">🔍</span>
     </div>
 
     <!-- News Container -->
-    <div id="news-container" class="grid gap-6"></div>
+    <div id="news-container" class="grid gap-4 sm:gap-6"></div>
 
   </div>
 
@@ -124,10 +149,12 @@
     let isDark = true;
     let watchlist = JSON.parse(localStorage.getItem("watchlist") || "[]");
 
+    const API = "https://alphafeed.up.railway.app";
+
     // ─── FETCH NEWS ───────────────────────────────────────────
     async function fetchNews() {
       try {
-        const res = await fetch("https://alphafeed.up.railway.app/news");
+        const res = await fetch(`${API}/news`);
         const data = await res.json();
 
         if (!data || data.length === 0) {
@@ -140,7 +167,7 @@
         generateSummary(data);
         generateTrending(data);
         generateBTCSignal(data);
-        
+        generateBreakingNews(data);
 
       } catch (error) {
         console.error(error);
@@ -158,32 +185,36 @@
       }
 
       articles.slice(0, 15).forEach((article, index) => {
-        const sentimentId = `sentiment-${index}-${Date.now()}`;
+        const sentiment = getSentiment(article.title);
+        const colors = {
+          Bullish: "text-green-400 border-green-400/30",
+          Bearish: "text-red-400 border-red-400/30",
+          Neutral: "text-yellow-400 border-yellow-400/30"
+        };
 
         const div = document.createElement("div");
         div.className = isDark
-          ? "backdrop-blur bg-white/5 border border-white/10 p-5 rounded-2xl shadow-xl hover:scale-[1.02] transition duration-300"
-          : "bg-white border border-gray-200 p-5 rounded-2xl shadow-xl hover:scale-[1.02] transition duration-300 text-gray-900";
+          ? "backdrop-blur bg-white/5 border border-white/10 p-4 sm:p-5 rounded-2xl shadow-xl hover:scale-[1.01] sm:hover:scale-[1.02] transition duration-300"
+          : "bg-white border border-gray-200 p-4 sm:p-5 rounded-2xl shadow-xl hover:scale-[1.01] sm:hover:scale-[1.02] transition duration-300 text-gray-900";
 
         div.innerHTML = `
-          <div class="flex gap-5">
+          <div class="flex gap-3 sm:gap-5">
             <img
               src="${article.image || 'https://images.unsplash.com/photo-1621761191319-c6fb62004040?w=200'}"
-              class="w-28 h-28 object-cover rounded-xl flex-shrink-0"
+              class="w-20 h-20 sm:w-28 sm:h-28 object-cover rounded-xl flex-shrink-0"
               onerror="this.src='https://images.unsplash.com/photo-1621761191319-c6fb62004040?w=200'"
             />
-            <div class="flex flex-col justify-between w-full">
+            <div class="flex flex-col justify-between w-full min-w-0">
               <div>
-                <h2 class="text-lg font-semibold leading-snug">${article.title}</h2>
-                <p class="${isDark ? 'text-gray-400' : 'text-gray-500'} text-sm mt-1">${article.source}</p>
+                <h2 class="text-sm sm:text-lg font-semibold leading-snug line-clamp-2">${article.title}</h2>
+                <p class="${isDark ? 'text-gray-400' : 'text-gray-500'} text-xs sm:text-sm mt-1">${article.source}</p>
               </div>
-              <div class="flex items-center justify-between mt-3">
-                <a href="${article.url}" target="_blank" class="text-blue-400 text-sm hover:underline">
+              <div class="flex items-center justify-between mt-2 sm:mt-3">
+                <a href="${article.url}" target="_blank" class="text-blue-400 text-xs sm:text-sm hover:underline">
                   Read article →
                 </a>
-                <span id="${sentimentId}"
-                  class="px-3 py-1 rounded-full text-xs font-semibold bg-white/5 border border-white/10 text-gray-400">
-                  Analyzing...
+                <span class="px-2 sm:px-3 py-1 rounded-full text-xs font-semibold bg-white/5 border ${colors[sentiment]}">
+                  ${sentiment}
                 </span>
               </div>
             </div>
@@ -191,23 +222,31 @@
         `;
 
         container.appendChild(div);
-        analyzeSentiment(article.title, sentimentId);
       });
+    }
+
+    // ─── INSTANT SENTIMENT ────────────────────────────────────
+    function getSentiment(headline) {
+      const h = headline.toLowerCase();
+      const bullishWords = ["surge","surges","soar","soars","rally","rallies","jump","jumps","gain","gains","rise","rises","high","highs","bull","bullish","approve","approved","launch","launches","adopt","adoption","record","breakthrough","partnership","expand","boost","recover","recovery","positive","profit","profits","win","wins","buy","inflow"];
+      const bearishWords = ["crash","crashes","drop","drops","fall","falls","plunge","plunges","decline","declines","low","lows","bear","bearish","dump","dumps","ban","bans","banned","hack","hacked","scam","fraud","lawsuit","sue","sued","arrest","arrested","fear","panic","risk","warning","collapse","lose","loss","losses","negative","reject","rejected","sell","selling"];
+
+      const b = bullishWords.filter(w => h.includes(w)).length;
+      const bear = bearishWords.filter(w => h.includes(w)).length;
+
+      if (b > bear) return "Bullish";
+      if (bear > b) return "Bearish";
+      return "Neutral";
     }
 
     // ─── GENERATE SUMMARY ─────────────────────────────────────
     function generateSummary(articles) {
-      const bullishWords = ["surge","surges","soar","soars","rally","rallies","jump","jumps","gain","gains","rise","rises","high","highs","bull","bullish","approve","approved","launch","launches","adopt","adoption","record","breakthrough","partnership","expand","boost","recover","recovery","positive","profit","profits","win","wins"];
-      const bearishWords = ["crash","crashes","drop","drops","fall","falls","plunge","plunges","decline","declines","low","lows","bear","bearish","dump","dumps","ban","bans","banned","hack","hacked","scam","fraud","lawsuit","sue","sued","arrest","arrested","fear","panic","risk","warning","collapse","lose","loss","losses","negative","reject","rejected"];
-
       let bullishCount = 0, bearishCount = 0, neutralCount = 0;
 
       articles.slice(0, 15).forEach(article => {
-        const h = article.title.toLowerCase();
-        const b = bullishWords.filter(w => h.includes(w)).length;
-        const bear = bearishWords.filter(w => h.includes(w)).length;
-        if (b > bear) bullishCount++;
-        else if (bear > b) bearishCount++;
+        const s = getSentiment(article.title);
+        if (s === "Bullish") bullishCount++;
+        else if (s === "Bearish") bearishCount++;
         else neutralCount++;
       });
 
@@ -227,7 +266,7 @@
         moodColor = "border-yellow-400/20";
       }
 
-      document.getElementById("market-summary").className = `mb-8 p-5 rounded-2xl border ${moodColor} ${isDark ? 'bg-white/5' : 'bg-white'}`;
+      document.getElementById("market-summary").className = `mb-6 sm:mb-8 p-4 sm:p-5 rounded-2xl border ${moodColor} ${isDark ? 'bg-white/5' : 'bg-white'}`;
       document.getElementById("summary-text").innerHTML = mood;
       document.getElementById("summary-bullish").textContent = `🟢 Bullish: ${bullishCount}`;
       document.getElementById("summary-bearish").textContent = `🔴 Bearish: ${bearishCount}`;
@@ -266,14 +305,13 @@
       ];
 
       const tagsContainer = document.getElementById("trending-tags");
-
       if (found.length === 0) {
         tagsContainer.innerHTML = `<span class="text-gray-500 text-sm">No trending narratives detected.</span>`;
         return;
       }
 
       tagsContainer.innerHTML = found.map((n, i) => `
-        <span class="px-3 py-1 rounded-full text-xs font-semibold border ${tagColors[i % tagColors.length]} cursor-pointer hover:opacity-80 transition"
+        <span class="px-2 sm:px-3 py-1 rounded-full text-xs font-semibold border ${tagColors[i % tagColors.length]} cursor-pointer hover:opacity-80 transition"
           onclick="filterByNarrative('${n.label}', '${n.keywords[0]}')">
           ${n.label}
         </span>
@@ -295,7 +333,7 @@
 
     // ─── BTC SIGNAL SCORE ─────────────────────────────────────
     function generateBTCSignal(articles) {
-      const bullishWords = ["surge","surges","soar","rally","jump","gain","rise","high","bull","bullish","approve","approved","record","breakthrough","boost","recover","positive","profit","win","buy","inflow"];
+      const bullishWords = ["surge","surges","soar","rally","jump","gain","rise","high","bull","bullish","approve","approved","record","breakthrough","boost","recover","positive","profit","win","buy","inflow","launches","adoption","partnership"];
       const bearishWords = ["crash","drop","fall","plunge","decline","low","bear","bearish","dump","ban","hack","scam","fraud","lawsuit","sued","arrest","fear","panic","risk","warning","collapse","loss","negative","reject","sell"];
 
       const btcArticles = articles.filter(a =>
@@ -334,39 +372,76 @@
       }
 
       document.getElementById("signal-score").textContent = score;
-      document.getElementById("signal-score").className = `text-2xl font-bold ${color}`;
+      document.getElementById("signal-score").className = `text-xl sm:text-2xl font-bold ${color}`;
       document.getElementById("signal-label").textContent = label;
-      document.getElementById("signal-label").className = `text-xl font-semibold mb-1 ${color}`;
+      document.getElementById("signal-label").className = `text-lg sm:text-xl font-semibold mb-1 ${color}`;
       document.getElementById("signal-desc").textContent = desc;
       const arc = document.getElementById("signal-arc");
       arc.style.strokeDasharray = `${score}, 100`;
       arc.style.stroke = strokeColor;
     }
 
+    // ─── BREAKING NEWS ────────────────────────────────────────
     function generateBreakingNews(articles) {
-  const breakingKeywords = [
-    "breaking", "urgent", "just in", "alert", "crash", "crashes",
-    "hack", "hacked", "exploit", "stolen", "ban", "banned", "arrest",
-    "arrested", "collapse", "emergency", "warning", "sec", "lawsuit",
-    "surge", "surges", "record", "all-time high", "ath"
-  ];
+      const breakingKeywords = ["breaking","urgent","just in","alert","crash","crashes","hack","hacked","exploit","stolen","ban","banned","arrest","arrested","collapse","emergency","warning","sec","lawsuit","surge","surges","record","all-time high","ath"];
 
-  const banner = document.getElementById("breaking-banner");
-  const bannerText = document.getElementById("breaking-text");
+      const banner = document.getElementById("breaking-banner");
+      const bannerText = document.getElementById("breaking-text");
 
-  // Find the first article that matches a breaking keyword
-  const breakingArticle = articles.find(article => {
-    const h = article.title.toLowerCase();
-    return breakingKeywords.some(k => h.includes(k));
-  });
+      const breakingArticle = articles.find(article =>
+        breakingKeywords.some(k => article.title.toLowerCase().includes(k))
+      );
 
-  if (breakingArticle) {
-    bannerText.textContent = breakingArticle.title;
-    banner.classList.remove("hidden");
-  } else {
-    banner.classList.add("hidden");
-  }
-}
+      if (breakingArticle) {
+        bannerText.textContent = breakingArticle.title;
+        banner.classList.remove("hidden");
+      } else {
+        banner.classList.add("hidden");
+      }
+    }
+
+    // ─── FEAR & GREED ─────────────────────────────────────────
+    async function fetchFearGreed() {
+      try {
+        const res = await fetch(`${API}/feargreed`);
+        const data = await res.json();
+
+        const score = data.value;
+        const classification = data.classification;
+
+        let color, strokeColor, desc;
+
+        if (score <= 25) {
+          color = "text-red-400"; strokeColor = "#f87171";
+          desc = "Investors are extremely fearful. Historically a buying opportunity.";
+        } else if (score <= 45) {
+          color = "text-orange-400"; strokeColor = "#fb923c";
+          desc = "Market sentiment is fearful. Caution advised but opportunities may exist.";
+        } else if (score <= 55) {
+          color = "text-yellow-400"; strokeColor = "#facc15";
+          desc = "Market is neutral. No strong directional bias from sentiment.";
+        } else if (score <= 75) {
+          color = "text-green-400"; strokeColor = "#4ade80";
+          desc = "Investors are greedy. Market may be overheating — trade carefully.";
+        } else {
+          color = "text-green-300"; strokeColor = "#86efac";
+          desc = "Extreme greed detected. Market is likely overbought. Consider taking profits.";
+        }
+
+        document.getElementById("fg-score").textContent = score;
+        document.getElementById("fg-score").className = `text-xl sm:text-2xl font-bold ${color}`;
+        document.getElementById("fg-label").textContent = classification;
+        document.getElementById("fg-label").className = `text-lg sm:text-xl font-semibold mb-1 ${color}`;
+        document.getElementById("fg-desc").textContent = desc;
+
+        const arc = document.getElementById("fg-arc");
+        arc.style.strokeDasharray = `${score}, 100`;
+        arc.style.stroke = strokeColor;
+
+      } catch (error) {
+        console.error("Fear & Greed fetch failed:", error);
+      }
+    }
 
     // ─── WATCHLIST ────────────────────────────────────────────
     function renderWatchlist() {
@@ -378,9 +453,7 @@
       el.innerHTML = watchlist.map(coin => `
         <div class="flex items-center gap-2 px-3 py-1 rounded-full text-xs font-semibold border bg-blue-400/10 text-blue-400 border-blue-400/20">
           <span class="cursor-pointer hover:opacity-80"
-            onclick="filterByNarrative('${coin}', '${coin.toLowerCase()}')">
-            ⭐ ${coin}
-          </span>
+            onclick="filterByNarrative('${coin}', '${coin.toLowerCase()}')">⭐ ${coin}</span>
           <span class="cursor-pointer text-gray-500 hover:text-red-400 transition"
             onclick="removeFromWatchlist('${coin}')">✕</span>
         </div>
@@ -403,60 +476,39 @@
       renderWatchlist();
     }
 
-    // ─── SENTIMENT ────────────────────────────────────────────
-    async function analyzeSentiment(headline, elementId) {
-      try {
-        const res = await fetch(`https://alphafeed.up.railway.app/sentiment?headline=${encodeURIComponent(headline)}`
-        );
-        const data = await res.json();
-        const el = document.getElementById(elementId);
-        if (!el) return;
-        const colors = {
-          Bullish: "text-green-400 border-green-400/30",
-          Bearish: "text-red-400 border-red-400/30",
-          Neutral: "text-yellow-400 border-yellow-400/30"
-        };
-        el.className = `px-3 py-1 rounded-full text-xs font-semibold bg-white/5 border ${colors[data.sentiment] || colors.Neutral}`;
-        el.textContent = data.sentiment;
-      } catch (e) {
-        console.error("Sentiment error:", e);
-      }
-    }
-
     // ─── PRICES ───────────────────────────────────────────────
     async function fetchPrices() {
-  try {
-    const res = await fetch("https://alphafeed.up.railway.app/prices");
-    const data = await res.json();
+      try {
+        const res = await fetch(`${API}/prices`);
+        const data = await res.json();
 
-    const coins = [
-      { id: "bitcoin", symbol: "BTC", color: "text-orange-400" },
-      { id: "ethereum", symbol: "ETH", color: "text-blue-400" },
-      { id: "solana", symbol: "SOL", color: "text-purple-400" }
-    ];
+        const coins = [
+          { id: "bitcoin", symbol: "BTC", color: "text-orange-400" },
+          { id: "ethereum", symbol: "ETH", color: "text-blue-400" },
+          { id: "solana", symbol: "SOL", color: "text-purple-400" }
+        ];
 
-    const pillBg = isDark ? "bg-white/5 border-white/10" : "bg-white border-gray-200";
-    const priceColor = isDark ? "text-white" : "text-gray-900";
+        const pillBg = isDark ? "bg-white/5 border-white/10" : "bg-white border-gray-200";
+        const priceColor = isDark ? "text-white" : "text-gray-900";
 
-    document.getElementById("price-bar").innerHTML = coins.map(coin => {
-      const price = data[coin.id]?.usd?.toLocaleString("en-US", {
-  style: "currency", currency: "USD"
-});
+        document.getElementById("price-bar").innerHTML = coins.map(coin => {
+          const price = data[coin.id]?.usd?.toLocaleString("en-US", {
+            style: "currency", currency: "USD"
+          });
+          return `
+            <div class="${pillBg} border rounded-xl px-3 sm:px-4 py-2 sm:py-3 flex items-center gap-2 sm:gap-3">
+              <span class="${coin.color} font-bold text-sm sm:text-base">${coin.symbol}</span>
+              <span class="${priceColor} font-semibold text-sm sm:text-base">${price}</span>
+            </div>
+          `;
+        }).join("");
 
-      return `
-        <div class="${pillBg} border rounded-xl px-4 py-3 flex items-center gap-3">
-          <span class="${coin.color} font-bold">${coin.symbol}</span>
-          <span class="${priceColor} font-semibold">${price}</span>
-        </div>
-      `;
-    }).join("");
-
-  } catch (error) {
-    console.error("Price fetch failed:", error);
-    document.getElementById("price-bar").innerHTML =
-      `<p class="text-gray-400 text-sm">Prices unavailable</p>`;
-  }
-}
+      } catch (error) {
+        console.error("Price fetch failed:", error);
+        document.getElementById("price-bar").innerHTML =
+          `<p class="text-gray-400 text-sm">Prices unavailable</p>`;
+      }
+    }
 
     // ─── EVENT LISTENERS ──────────────────────────────────────
     document.getElementById("search-input").addEventListener("input", (e) => {
@@ -481,14 +533,15 @@
       if (isDark) {
         body.className = "bg-gradient-to-br from-slate-900 via-gray-900 to-black min-h-screen text-white";
         toggle.textContent = "🌙 Dark";
-        searchInput.className = "w-full bg-white/5 border border-white/10 rounded-xl px-5 py-3 text-white placeholder-gray-500 focus:outline-none focus:border-blue-500 transition";
+        searchInput.className = "w-full bg-white/5 border border-white/10 rounded-xl px-5 py-3 text-white placeholder-gray-500 focus:outline-none focus:border-blue-500 transition text-sm sm:text-base";
       } else {
         body.className = "bg-gradient-to-br from-slate-100 via-gray-100 to-white min-h-screen text-gray-900";
         toggle.textContent = "☀️ Light";
-        searchInput.className = "w-full bg-white border border-gray-200 rounded-xl px-5 py-3 text-gray-900 placeholder-gray-400 focus:outline-none focus:border-blue-500 transition";
+        searchInput.className = "w-full bg-white border border-gray-200 rounded-xl px-5 py-3 text-gray-900 placeholder-gray-400 focus:outline-none focus:border-blue-500 transition text-sm sm:text-base";
       }
 
       fetchPrices();
+      fetchFearGreed();
       renderArticles(allArticles);
       generateSummary(allArticles);
       generateTrending(allArticles);
@@ -499,9 +552,11 @@
     // ─── INIT ─────────────────────────────────────────────────
     fetchNews();
     fetchPrices();
+    fetchFearGreed();
     renderWatchlist();
     setInterval(fetchNews, 60000);
-    setInterval(fetchPrices, 120000
+    setInterval(fetchPrices, 120000);
+    setInterval(fetchFearGreed, 300000);
   </script>
 
 </body>

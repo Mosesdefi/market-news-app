@@ -13,7 +13,7 @@ app.get("/", (req, res) => {
   res.json({
     status: "ok",
     message: "AlphaFeed API is running",
-    endpoints: ["/news", "/prices", "/sentiment"]
+    endpoints: ["/news", "/prices", "/sentiment", "/feargreed"]
   });
 });
 
@@ -83,6 +83,32 @@ app.get("/prices", async (req, res) => {
   } catch (error) {
     console.error("Price ERROR:", error.message);
     res.status(500).json({ error: "Failed to fetch prices" });
+  }
+});
+
+app.get("/feargreed", async (req, res) => {
+  try {
+    const data = await new Promise((resolve, reject) => {
+      https.get({
+        hostname: 'api.alternative.me',
+        path: '/fng/?limit=1',
+        headers: { 'User-Agent': 'Mozilla/5.0' }
+      }, (r) => {
+        let d = '';
+        r.on('data', c => d += c);
+        r.on('end', () => resolve(JSON.parse(d)));
+      }).on('error', reject);
+    });
+
+    const index = data.data[0];
+    res.json({
+      value: parseInt(index.value),
+      classification: index.value_classification
+    });
+
+  } catch (error) {
+    console.error("Fear & Greed ERROR:", error.message);
+    res.status(500).json({ error: "Failed to fetch fear & greed index" });
   }
 });
 
