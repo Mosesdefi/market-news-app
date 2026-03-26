@@ -166,8 +166,9 @@
         renderArticles(data);
         generateSummary(data);
         generateTrending(data);
-        generateBTCSignal(data);
         generateBreakingNews(data);
+// BTC signal runs last so Fear & Greed is already loaded
+setTimeout(() => generateBTCSignal(data), 1000);
 
       } catch (error) {
         console.error(error);
@@ -227,17 +228,55 @@
 
     // ─── INSTANT SENTIMENT ────────────────────────────────────
     function getSentiment(headline) {
-      const h = headline.toLowerCase();
-      const bullishWords = ["surge","surges","soar","soars","rally","rallies","jump","jumps","gain","gains","rise","rises","high","highs","bull","bullish","approve","approved","launch","launches","adopt","adoption","record","breakthrough","partnership","expand","boost","recover","recovery","positive","profit","profits","win","wins","buy","inflow"];
-      const bearishWords = ["crash","crashes","drop","drops","fall","falls","plunge","plunges","decline","declines","low","lows","bear","bearish","dump","dumps","ban","bans","banned","hack","hacked","scam","fraud","lawsuit","sue","sued","arrest","arrested","fear","panic","risk","warning","collapse","lose","loss","losses","negative","reject","rejected","sell","selling"];
+  const h = headline.toLowerCase();
 
-      const b = bullishWords.filter(w => h.includes(w)).length;
-      const bear = bearishWords.filter(w => h.includes(w)).length;
+  const negations = ["not", "no", "never", "fails to", "unable to", "struggles to", "refuses to", "despite", "without", "cant", "cannot", "wasn't", "isn't", "aren't"];
 
-      if (b > bear) return "Bullish";
-      if (bear > b) return "Bearish";
-      return "Neutral";
+  const bullishWords = [
+    "surge", "surges", "soars", "rally", "rallies", "jumps", "gains",
+    "rises", "highs", "bullish", "approved", "launches", "adoption",
+    "record high", "all-time high", "ath", "breakthrough", "partnership",
+    "boosts", "recovers", "recovery", "profits", "wins", "inflows",
+    "expansion", "upgrades", "outperforms", "beats expectations"
+  ];
+
+  const bearishWords = [
+    "crashes", "drops", "falls", "plunges", "declines", "lows", "bearish",
+    "banned", "hacked", "exploit", "stolen", "fraud", "lawsuit", "sued",
+    "arrested", "panic", "warning", "collapses", "losses", "rejected",
+    "selling", "outflows", "downturn", "weakens", "tumbles", "slumps",
+    "fails", "struggles", "concern", "risk", "fears", "uncertainty",
+    "investigation", "charges", "penalty", "fine", "seized"
+  ];
+
+  // Check for negation before counting bullish words
+  let bullishCount = 0;
+  let bearishCount = 0;
+
+  bullishWords.forEach(word => {
+    if (h.includes(word)) {
+      const wordIndex = h.indexOf(word);
+      const preceding = h.substring(Math.max(0, wordIndex - 20), wordIndex);
+      const isNegated = negations.some(n => preceding.includes(n));
+      if (isNegated) bearishCount++; // negated bullish = bearish signal
+      else bullishCount++;
     }
+  });
+
+  bearishWords.forEach(word => {
+    if (h.includes(word)) {
+      const wordIndex = h.indexOf(word);
+      const preceding = h.substring(Math.max(0, wordIndex - 20), wordIndex);
+      const isNegated = negations.some(n => preceding.includes(n));
+      if (isNegated) bullishCount++; // negated bearish = bullish signal
+      else bearishCount++;
+    }
+  });
+
+  if (bullishCount > bearishCount) return "Bullish";
+  if (bearishCount > bullishCount) return "Bearish";
+  return "Neutral";
+}
 
     // ─── GENERATE SUMMARY ─────────────────────────────────────
     function generateSummary(articles) {
@@ -333,53 +372,69 @@
 
     // ─── BTC SIGNAL SCORE ─────────────────────────────────────
     function generateBTCSignal(articles) {
-      const bullishWords = ["surge","surges","soar","rally","jump","gain","rise","high","bull","bullish","approve","approved","record","breakthrough","boost","recover","positive","profit","win","buy","inflow","launches","adoption","partnership"];
-      const bearishWords = ["crash","drop","fall","plunge","decline","low","bear","bearish","dump","ban","hack","scam","fraud","lawsuit","sued","arrest","fear","panic","risk","warning","collapse","loss","negative","reject","sell"];
+  const btcArticles = articles.filter(a =>
+    a.title.toLowerCase().includes("bitcoin") ||
+    a.title.toLowerCase().includes("btc")
+  );
 
-      const btcArticles = articles.filter(a =>
-        a.title.toLowerCase().includes("bitcoin") ||
-        a.title.toLowerCase().includes("btc")
-      );
+  const relevant = btcArticles.length > 0 ? btcArticles : articles;
 
-      const relevant = btcArticles.length > 0 ? btcArticles : articles;
-      let bullishScore = 0, bearishScore = 0;
+  let bullishCount = 0;
+  let bearishCount = 0;
+  let neutralCount = 0;
 
-      relevant.forEach(article => {
-        const h = article.title.toLowerCase();
-        bullishScore += bullishWords.filter(w => h.includes(w)).length;
-        bearishScore += bearishWords.filter(w => h.includes(w)).length;
-      });
+  relevant.forEach(article => {
+    const s = getSentiment(article.title);
+    if (s === "Bullish") bullishCount++;
+    else if (s === "Bearish") bearishCount++;
+    else neutralCount++;
+  });
 
-      const total = bullishScore + bearishScore;
-      const score = total > 0 ? Math.round((bullishScore / total) * 100) : 50;
+  const total = bullishCount + bearishCount + neutralCount;
+  if (total === 0) return;
 
-      let label, desc, color, strokeColor;
-      if (score >= 70) {
-        label = "🟢 Strong Buy"; desc = "BTC headlines are overwhelmingly positive. Momentum favors bulls.";
-        color = "text-green-400"; strokeColor = "#4ade80";
-      } else if (score >= 55) {
-        label = "🟢 Mild Bullish"; desc = "More positive than negative signals. Cautious optimism for BTC.";
-        color = "text-green-400"; strokeColor = "#4ade80";
-      } else if (score >= 45) {
-        label = "🟡 Neutral"; desc = "Mixed signals on BTC. No clear directional edge right now.";
-        color = "text-yellow-400"; strokeColor = "#facc15";
-      } else if (score >= 30) {
-        label = "🔴 Mild Bearish"; desc = "More negative than positive signals. Be cautious with BTC.";
-        color = "text-red-400"; strokeColor = "#f87171";
-      } else {
-        label = "🔴 Strong Sell"; desc = "BTC headlines are overwhelmingly negative. Bears in control.";
-        color = "text-red-400"; strokeColor = "#f87171";
-      }
+  // Base score from headlines
+  let score = Math.round((bullishCount / total) * 100);
 
-      document.getElementById("signal-score").textContent = score;
-      document.getElementById("signal-score").className = `text-xl sm:text-2xl font-bold ${color}`;
-      document.getElementById("signal-label").textContent = label;
-      document.getElementById("signal-label").className = `text-lg sm:text-xl font-semibold mb-1 ${color}`;
-      document.getElementById("signal-desc").textContent = desc;
-      const arc = document.getElementById("signal-arc");
-      arc.style.strokeDasharray = `${score}, 100`;
-      arc.style.stroke = strokeColor;
-    }
+  // Cross-validate with Fear & Greed if available
+  const fgScore = parseInt(document.getElementById("fg-score").textContent);
+  if (!isNaN(fgScore)) {
+    // Blend headline score (70%) with fear & greed (30%)
+    score = Math.round((score * 0.7) + (fgScore * 0.3));
+  }
+
+  let label, desc, color, strokeColor;
+  if (score >= 70) {
+    label = "🟢 Strong Buy";
+    desc = `${bullishCount} bullish vs ${bearishCount} bearish BTC headlines. Momentum favors bulls.`;
+    color = "text-green-400"; strokeColor = "#4ade80";
+  } else if (score >= 55) {
+    label = "🟢 Mild Bullish";
+    desc = `More positive than negative BTC signals. Cautious optimism.`;
+    color = "text-green-400"; strokeColor = "#4ade80";
+  } else if (score >= 45) {
+    label = "🟡 Neutral";
+    desc = `Mixed BTC signals. ${bullishCount} bullish, ${bearishCount} bearish headlines. No clear edge.`;
+    color = "text-yellow-400"; strokeColor = "#facc15";
+  } else if (score >= 30) {
+    label = "🔴 Mild Bearish";
+    desc = `More negative than positive BTC signals. Exercise caution.`;
+    color = "text-red-400"; strokeColor = "#f87171";
+  } else {
+    label = "🔴 Strong Sell";
+    desc = `${bearishCount} bearish vs ${bullishCount} bullish BTC headlines. Bears in control.`;
+    color = "text-red-400"; strokeColor = "#f87171";
+  }
+
+  document.getElementById("signal-score").textContent = score;
+  document.getElementById("signal-score").className = `text-xl sm:text-2xl font-bold ${color}`;
+  document.getElementById("signal-label").textContent = label;
+  document.getElementById("signal-label").className = `text-lg sm:text-xl font-semibold mb-1 ${color}`;
+  document.getElementById("signal-desc").textContent = desc;
+  const arc = document.getElementById("signal-arc");
+  arc.style.strokeDasharray = `${score}, 100`;
+  arc.style.stroke = strokeColor;
+}
 
     // ─── BREAKING NEWS ────────────────────────────────────────
     function generateBreakingNews(articles) {
